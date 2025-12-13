@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-exports.sendContactEmail = async (req, res, next) => {
+const sendContactEmail = async (req, res, next) => {
   try {
     const { name, email, message } = req.body;
 
@@ -50,3 +50,5 @@ exports.sendContactEmail = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports = { sendContactEmail };
