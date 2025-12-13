@@ -1,37 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  createPost, 
-  getPosts, 
-  getPostBySlug, 
-  getPostById,
-  updatePost, 
-  deletePost,
-  toggleLike,
-  toggleBookmark,
-  getMyPosts,
-  getBookmarkedPosts,
-  getUserStats
-} = require('../controllers/post.controller');
-const { protect } = require('../middlewares/auth.middleware');
+const postController = require('../controllers/post.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
-// Rutas públicas
-router.get('/posts', getPosts);
-router.get('/posts/slug/:slug', getPostBySlug);
-router.get('/posts/:id', getPostById);
-
-// Rutas protegidas (requieren autenticación)
-router.post('/posts', protect, createPost);
-router.put('/posts/:id', protect, updatePost);
-router.delete('/posts/:id', protect, deletePost);
-
-// Interacciones con posts
-router.post('/posts/:id/like', protect, toggleLike);
-router.post('/posts/:id/bookmark', protect, toggleBookmark);
-
-// Posts del usuario
-router.get('/posts/my/all', protect, getMyPosts);
-router.get('/posts/my/bookmarked', protect, getBookmarkedPosts);
-router.get('/posts/my/stats', protect, getUserStats);
+router.get('/', postController.getAllPosts);
+router.get('/slug/:slug', postController.getPostBySlug);
+router.get('/:id', postController.getPostById);
+router.post('/', authMiddleware, postController.createPost);
+router.put('/:id', authMiddleware, postController.updatePost);
+router.delete('/:id', authMiddleware, postController.deletePost);
+router.post('/:id/like', authMiddleware, postController.toggleLike);
+router.post('/:id/bookmark', authMiddleware, postController.toggleBookmark);
 
 module.exports = router;
