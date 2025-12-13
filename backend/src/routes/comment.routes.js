@@ -1,21 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {
-  createComment,
-  getCommentsByPost,
-  updateComment,
-  deleteComment,
-  toggleLikeComment
-} = require('../controllers/comment.controller');
-const { protect } = require('../middlewares/auth.middleware');
+const commentController = require('../controllers/comment.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
-// Rutas públicas
-router.get('/posts/:postId/comments', getCommentsByPost);
-
-// Rutas protegidas
-router.post('/comments', protect, createComment);
-router.put('/comments/:id', protect, updateComment);
-router.delete('/comments/:id', protect, deleteComment);
-router.post('/comments/:id/like', protect, toggleLikeComment);
+router.get('/post/:postId', commentController.getCommentsByPost);
+router.post('/', authMiddleware, commentController.createComment);
+router.put('/:id', authMiddleware, commentController.updateComment);
+router.delete('/:id', authMiddleware, commentController.deleteComment);
 
 module.exports = router;
