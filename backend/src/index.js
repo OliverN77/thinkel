@@ -2,54 +2,96 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
-
 const connectDB = require('./config/db');
 const errorMiddleware = require('./middlewares/error.middleware');
-
 const authRoutes = require('./routes/auth.routes');
 const contactRoutes = require('./routes/contact.routes');
 const postRoutes = require('./routes/post.routes');
 const commentRoutes = require('./routes/comment.routes');
+const fs = require('fs');
 
 const app = express();
-
-// 🔹 Conectar a la DB
 connectDB();
 
-// 🔹 Crear directorio uploads si no existe (Render lo permite)
-const uploadsDir = path.join(__dirname, 'uploads/avatars');
+// Crear directorio de uploads si no existe
+const uploadsDir = path.join(__dirname, '../uploads/avatars');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// 🔹 CORS configurado para Vercel
+// CORS configurado para producción
 app.use(cors({
   origin: [
-    'http://localhost:5173',          // desarrollo
-    'https://thinkelweb.vercel.app/'  // producción
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://thinkel.onrender.com',
+    process.env.FRONTEND_URL || '*'
   ],
   credentials: true
 }));
 
-// 🔹 Middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// 🔹 Servir archivos estáticos (avatars)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Servir archivos estáticos (avatars)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// 🔹 Rutas
+// Ruta raíz para verificar que el servidor está corriendo
+app.get('/', (req, res) => {
+  res.json({ 
+    success: true,
+    message: '✅ Thinkel API está corriendo correctamente',
+    version: '1.0.0',
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        profile: 'GET /api/auth/profile'
+      },
+      posts: {
+        getAll: 'GET /api/posts',
+        getOne: 'GET /api/posts/:id',
+        create: 'POST /api/posts',
+        update: 'PUT /api/posts/:id',
+        delete: 'DELETE /api/posts/:id'
+      },
+      comments: 'GET/POST /api/comments',
+      contact: 'POST /api/contact'
+    }
+  });
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Rutas API
 app.use('/api/auth', authRoutes);
-app.use('/api/contacts', contactRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 
-// 🔹 Middleware de errores (siempre al final)
+// Ruta 404 para rutas no encontradas
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Ruta ${req.originalUrl} no encontrada`,
+    availableEndpoints: '/api/auth, /api/posts, /api/comments, /api/contact'
+  });
+});
+
+// Middleware de error al final
 app.use(errorMiddleware);
 
-// 🔹 Puerto dinámico (OBLIGATORIO en Render)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+  console.log(`📍 Entorno: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 URL: ${process.env.NODE_ENV === 'production' ? 'https://thinkel.onrender.com' : `http://localhost:${PORT}`}`);
 });
