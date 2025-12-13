@@ -1,7 +1,7 @@
 const Post = require('../models/post.model');
 
 // Crear nuevo post
-exports.createPost = async (req, res, next) => {
+const createPost = async (req, res, next) => {
   try {
     const { title, content, description, thumbnail, tags } = req.body;
     
@@ -28,7 +28,7 @@ exports.createPost = async (req, res, next) => {
     const author = {
       userId: req.user._id,
       name: req.user.name,
-      username: req.user.username || req.user.email.split('@')[0], // Generar username desde email si no existe
+      username: req.user.username || req.user.email.split('@')[0],
       avatar: req.user.avatar || null,
       bio: req.user.bio || ''
     };
@@ -54,7 +54,7 @@ exports.createPost = async (req, res, next) => {
 };
 
 // Obtener todos los posts (con paginación y filtros)
-exports.getPosts = async (req, res, next) => {
+const getAllPosts = async (req, res, next) => {
   try {
     const { 
       page = 1, 
@@ -67,17 +67,14 @@ exports.getPosts = async (req, res, next) => {
 
     const query = { published: true };
 
-    // Filtro por tag
     if (tag) {
       query.tags = tag;
     }
 
-    // Filtro por autor
     if (author) {
       query['author.userId'] = author;
     }
 
-    // Búsqueda por título o descripción
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -111,7 +108,7 @@ exports.getPosts = async (req, res, next) => {
 };
 
 // Obtener un post por slug
-exports.getPostBySlug = async (req, res, next) => {
+const getPostBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
@@ -124,7 +121,6 @@ exports.getPostBySlug = async (req, res, next) => {
       });
     }
 
-    // Incrementar vistas
     post.views += 1;
     await post.save();
 
@@ -138,7 +134,7 @@ exports.getPostBySlug = async (req, res, next) => {
 };
 
 // Obtener un post por ID
-exports.getPostById = async (req, res, next) => {
+const getPostById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -161,7 +157,7 @@ exports.getPostById = async (req, res, next) => {
 };
 
 // Actualizar post
-exports.updatePost = async (req, res, next) => {
+const updatePost = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, content, description, thumbnail, tags, published } = req.body;
@@ -175,7 +171,6 @@ exports.updatePost = async (req, res, next) => {
       });
     }
 
-    // Verificar que el usuario sea el autor
     if (post.author.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -183,7 +178,6 @@ exports.updatePost = async (req, res, next) => {
       });
     }
 
-    // Actualizar campos
     if (title) post.title = title;
     if (content) post.content = content;
     if (description) post.description = description;
@@ -191,7 +185,6 @@ exports.updatePost = async (req, res, next) => {
     if (tags) post.tags = tags;
     if (published !== undefined) post.published = published;
 
-    // Si se cambia el título, regenerar el slug
     if (title && title !== post.title) {
       post.slug = undefined;
     }
@@ -209,7 +202,7 @@ exports.updatePost = async (req, res, next) => {
 };
 
 // Eliminar post
-exports.deletePost = async (req, res, next) => {
+const deletePost = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -222,7 +215,6 @@ exports.deletePost = async (req, res, next) => {
       });
     }
 
-    // Verificar que el usuario sea el autor
     if (post.author.userId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -242,7 +234,7 @@ exports.deletePost = async (req, res, next) => {
 };
 
 // Like/Unlike post
-exports.toggleLike = async (req, res, next) => {
+const toggleLike = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -259,11 +251,9 @@ exports.toggleLike = async (req, res, next) => {
     const hasLiked = post.likedBy.includes(userId);
 
     if (hasLiked) {
-      // Quitar like
       post.likedBy = post.likedBy.filter(id => id.toString() !== userId.toString());
       post.likes = Math.max(0, post.likes - 1);
     } else {
-      // Agregar like
       post.likedBy.push(userId);
       post.likes += 1;
     }
@@ -284,7 +274,7 @@ exports.toggleLike = async (req, res, next) => {
 };
 
 // Bookmark/Unbookmark post
-exports.toggleBookmark = async (req, res, next) => {
+const toggleBookmark = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -301,10 +291,8 @@ exports.toggleBookmark = async (req, res, next) => {
     const hasBookmarked = post.bookmarkedBy.includes(userId);
 
     if (hasBookmarked) {
-      // Quitar bookmark
       post.bookmarkedBy = post.bookmarkedBy.filter(id => id.toString() !== userId.toString());
     } else {
-      // Agregar bookmark
       post.bookmarkedBy.push(userId);
     }
 
@@ -323,22 +311,18 @@ exports.toggleBookmark = async (req, res, next) => {
 };
 
 // Obtener estadísticas del usuario
-exports.getUserStats = async (req, res, next) => {
+const getUserStats = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    // Contar posts del usuario
     const totalPosts = await Post.countDocuments({ 'author.userId': userId });
 
-    // Obtener total de likes en todos los posts del usuario
     const postsWithLikes = await Post.find({ 'author.userId': userId }).select('likes');
     const totalLikes = postsWithLikes.reduce((sum, post) => sum + post.likes, 0);
 
-    // Obtener total de comentarios en todos los posts del usuario
     const postsWithComments = await Post.find({ 'author.userId': userId }).select('comments');
     const totalComments = postsWithComments.reduce((sum, post) => sum + post.comments, 0);
 
-    // Obtener posts guardados por el usuario
     const savedPosts = await Post.countDocuments({ bookmarkedBy: userId });
 
     res.status(200).json({
@@ -356,7 +340,7 @@ exports.getUserStats = async (req, res, next) => {
 };
 
 // Obtener posts del usuario autenticado
-exports.getMyPosts = async (req, res, next) => {
+const getMyPosts = async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -384,7 +368,7 @@ exports.getMyPosts = async (req, res, next) => {
 };
 
 // Obtener posts guardados (bookmarked)
-exports.getBookmarkedPosts = async (req, res, next) => {
+const getBookmarkedPosts = async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -415,4 +399,18 @@ exports.getBookmarkedPosts = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+module.exports = {
+  createPost,
+  getAllPosts,
+  getPostBySlug,
+  getPostById,
+  updatePost,
+  deletePost,
+  toggleLike,
+  toggleBookmark,
+  getUserStats,
+  getMyPosts,
+  getBookmarkedPosts
 };
