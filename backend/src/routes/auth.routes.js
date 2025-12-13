@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getProfile, updateProfile } = require('../controllers/auth.controller');
-const { protect } = require('../middlewares/auth.middleware');
-const upload = require('../middlewares/upload.middleware');
+const authController = require('../controllers/auth.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
+const upload = require('../config/multer');
 
-router.post('/auth/register', register);
-router.post('/auth/login', login);
-router.get('/auth/profile', protect, getProfile);
-router.put('/auth/profile', protect, upload.single('avatar'), updateProfile);
+router.post('/register', authController.register);
+router.post('/login', authController.login);
+router.get('/profile', authMiddleware, authController.getProfile);
+router.put('/profile', authMiddleware, upload.single('avatar'), authController.updateProfile);
 
 module.exports = router;
