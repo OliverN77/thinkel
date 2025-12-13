@@ -37,7 +37,7 @@ Plataforma de blog completa con sistema de autenticación, perfiles de usuario, 
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/TU_USUARIO/thinkel.git
+git clone https://github.com/OliverN77/thinkel.git
 cd thinkel
 ```
 
@@ -96,30 +96,6 @@ npm start
 cd frontend
 npm run build
 npm run preview
-```
-
-## 📁 Estructura del Proyecto
-
-```
-thinkel/
-├── backend/
-│   ├── src/
-│   │   ├── config/          # Configuración (DB)
-│   │   ├── controllers/     # Lógica de negocio
-│   │   ├── middlewares/     # Middlewares (auth, errors)
-│   │   ├── models/          # Modelos de MongoDB
-│   │   └── routes/          # Rutas de API
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── components/      # Componentes React
-    │   ├── pages/           # Páginas
-    │   ├── services/        # API services
-    │   ├── hooks/           # Custom hooks
-    │   ├── types/           # TypeScript types
-    │   └── lib/             # Utilidades
-    └── package.json
 ```
 
 ## 🔑 Variables de Entorno
