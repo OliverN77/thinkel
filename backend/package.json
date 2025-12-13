@@ -1,15 +1,19 @@
 {
-  "name": "backend",
+  "name": "thinkel-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backend API for Thinkel platform",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": ["thinkel", "blog", "api", "backend"],
+  "author": "Oliver",
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
