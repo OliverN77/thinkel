@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
-exports.protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     let token;
     
@@ -25,3 +25,5 @@ exports.protect = async (req, res, next) => {
     res.status(401).json({ success: false, message: 'Token inválido o expirado' });
   }
 };
+
+module.exports = protect;
