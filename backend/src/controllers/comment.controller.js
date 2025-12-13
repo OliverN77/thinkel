@@ -2,7 +2,7 @@ const Comment = require('../models/comment.model');
 const Post = require('../models/post.model');
 
 // Crear comentario
-exports.createComment = async (req, res, next) => {
+const createComment = async (req, res, next) => {
   try {
     const { postId, content, parentId } = req.body;
 
@@ -61,7 +61,7 @@ exports.createComment = async (req, res, next) => {
 };
 
 // Obtener comentarios de un post
-exports.getCommentsByPost = async (req, res, next) => {
+const getCommentsByPost = async (req, res, next) => {
   try {
     const { postId } = req.params;
     const { sort = '-createdAt' } = req.query;
@@ -106,7 +106,7 @@ exports.getCommentsByPost = async (req, res, next) => {
 };
 
 // Actualizar comentario
-exports.updateComment = async (req, res, next) => {
+const updateComment = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
@@ -144,7 +144,7 @@ exports.updateComment = async (req, res, next) => {
 };
 
 // Eliminar comentario
-exports.deleteComment = async (req, res, next) => {
+const deleteComment = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -188,7 +188,7 @@ exports.deleteComment = async (req, res, next) => {
 };
 
 // Like/Unlike comentario
-exports.toggleLikeComment = async (req, res, next) => {
+const toggleLikeComment = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -225,4 +225,12 @@ exports.toggleLikeComment = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+module.exports = {
+  createComment,
+  getCommentsByPost,
+  updateComment,
+  deleteComment,
+  toggleLikeComment
 };
