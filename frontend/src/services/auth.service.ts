@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const API_URL = 'https://thinkel.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://thinkel.onrender.com';
 
 export const registerUser = (data: { name: string; email: string; password: string }) =>
-  axios.post(`${API_URL}/api/auth/register`, data);
+  axios.post(`${API_URL}/auth/register`, data);
 
 export const loginUser = (data: { email: string; password: string }) =>
-  axios.post(`${API_URL}/api/auth/login`, data);
+  axios.post(`${API_URL}/auth/login`, data);
 
 export const getProfile = async () => {
   const token = localStorage.getItem('token');
