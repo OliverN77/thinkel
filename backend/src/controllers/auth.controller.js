@@ -1,6 +1,5 @@
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
 // Registrar usuario
 const register = async (req, res, next) => {
@@ -43,15 +42,12 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Hashear contraseña
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Crear usuario
+    // ✅ Crear usuario (el modelo hashea automáticamente la contraseña)
     const user = await User.create({
       name,
       email: email.toLowerCase(),
-      password: hashedPassword
+      password, // ← NO hashear aquí, el modelo lo hace automáticamente
+      username: email.split('@')[0] // Generar username desde email
     });
 
     // Generar token JWT
@@ -71,6 +67,7 @@ const register = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         avatar: user.avatar,
         bio: user.bio,
         createdAt: user.createdAt
@@ -79,6 +76,15 @@ const register = async (req, res, next) => {
 
   } catch (error) {
     console.error('❌ Error en register:', error);
+    
+    // Manejar error de duplicado de email
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'El email ya está registrado'
+      });
+    }
+    
     next(error);
   }
 };
@@ -98,8 +104,9 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Buscar usuario
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    // ✅ Buscar usuario (con contraseña incluida)
+    const user = await User.findOne({ email: email.toLowerCase() });
+    
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -107,8 +114,9 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Verificar contraseña
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // ✅ Usar el método comparePassword del modelo
+    const isPasswordValid = await user.comparePassword(password);
+    
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -133,6 +141,7 @@ const login = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         avatar: user.avatar,
         bio: user.bio,
         createdAt: user.createdAt
@@ -163,6 +172,7 @@ const getProfile = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         avatar: user.avatar,
         bio: user.bio,
         createdAt: user.createdAt
@@ -177,7 +187,7 @@ const getProfile = async (req, res, next) => {
 // Actualizar perfil
 const updateProfile = async (req, res, next) => {
   try {
-    const { name, bio } = req.body;
+    const { name, bio, username } = req.body;
     const userId = req.user._id;
 
     const user = await User.findById(userId);
@@ -192,6 +202,22 @@ const updateProfile = async (req, res, next) => {
     // Actualizar campos
     if (name) user.name = name;
     if (bio !== undefined) user.bio = bio;
+    if (username) {
+      // Verificar que el username no esté tomado
+      const existingUsername = await User.findOne({ 
+        username: username.toLowerCase(),
+        _id: { $ne: userId } 
+      });
+      
+      if (existingUsername) {
+        return res.status(400).json({
+          success: false,
+          message: 'El nombre de usuario ya está en uso'
+        });
+      }
+      
+      user.username = username.toLowerCase();
+    }
 
     // Si se subió un avatar
     if (req.file) {
@@ -209,6 +235,7 @@ const updateProfile = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         avatar: user.avatar,
         bio: user.bio,
         createdAt: user.createdAt
