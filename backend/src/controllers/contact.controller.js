@@ -38,8 +38,10 @@ const sendContactEmail = async (req, res, next) => {
         pass: process.env.EMAIL_PASS,
       },
       tls: {
-        rejectUnauthorized: false // Para evitar problemas con certificados
-      }
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 5000, // ✅ Timeout de 5 segundos
+      greetingTimeout: 5000,
     });
 
     // Configurar el correo
@@ -61,26 +63,35 @@ const sendContactEmail = async (req, res, next) => {
     try {
       await transporter.sendMail(mailOptions);
       
-      res.status(200).json({
+      console.log('✅ Email enviado correctamente');
+      return res.status(200).json({
         success: true,
         message: 'Mensaje enviado exitosamente',
       });
     } catch (emailError) {
-      // Si falla el envío, guardar en logs pero devolver éxito
+      // ✅ Si falla el envío, guardar en logs pero devolver éxito
       console.error('Error al enviar email:', emailError.message);
       console.log('📧 Mensaje guardado en logs:');
       console.log(`Nombre: ${name}`);
       console.log(`Email: ${email}`);
       console.log(`Mensaje: ${message}`);
       
-      res.status(200).json({
+      // ✅ IMPORTANTE: Devolver 200 aunque falle el email
+      return res.status(200).json({
         success: true,
         message: 'Mensaje recibido correctamente',
       });
     }
   } catch (error) {
+    // ✅ Error general del controlador
     console.error('Error en sendContactEmail:', error);
-    next(error);
+    
+    // Devolver error 500 solo si es un error crítico
+    return res.status(500).json({
+      success: false,
+      message: 'Error al procesar el mensaje',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
