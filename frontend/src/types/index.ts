@@ -1,10 +1,12 @@
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
-  avatar?: string;
+  username?: string;
+  avatar?: string | null;
   bio?: string;
-  role: 'user' | 'admin';
+  role?: 'user' | 'admin';
+  createdAt?: string;
 }
 
 export interface Project {
@@ -12,4 +14,17 @@ export interface Project {
   title: string;
   description: string;
   updatedAt: string;
+}
+
+// ✅ Agregar interfaces de respuestas
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  token: string;
+  user: User;
+}
+
+export interface ProfileResponse {
+  success: boolean;
+  user: User;
 }
