@@ -27,23 +27,27 @@ const sendContactEmail = async (req, res) => {
   }
 
   try {
-    // Configurar transporter de Gmail
+    // ✅ Usar puerto 465 con SSL
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // ✅ Usar servicio predefinido
+      host: 'smtp.gmail.com',
+      port: 465, // ✅ Puerto SSL
+      secure: true, // ✅ Activar SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS.replace(/\s/g, ''), // Eliminar espacios
+        pass: process.env.EMAIL_PASS.replace(/\s/g, ''),
       },
       tls: {
         rejectUnauthorized: false
       }
     });
 
-    // Verificar conexión antes de enviar
+    console.log('🔌 Intentando conectar con Gmail (puerto 465)...');
+
+    // Verificar conexión
     await transporter.verify();
     console.log('✅ Conexión SMTP verificada');
 
-    // Configurar el email
+    // Configurar email
     const mailOptions = {
       from: `"Thinkel Contact" <${process.env.EMAIL_FROM}>`,
       to: process.env.EMAIL_USER,
@@ -66,9 +70,6 @@ const sendContactEmail = async (req, res) => {
             <p style="margin: 0 0 10px 0;"><strong style="color: #555;">Mensaje:</strong></p>
             <p style="margin: 0; line-height: 1.6; color: #333;">${message}</p>
           </div>
-          <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; font-size: 12px;">
-            <p>Este mensaje fue enviado desde el formulario de contacto de Thinkel</p>
-          </div>
         </div>
       `,
       replyTo: email,
@@ -86,20 +87,10 @@ const sendContactEmail = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error al enviar email:', error.message);
+    console.error('Código de error:', error.code);
     
-    // Si el error es de autenticación
-    if (error.code === 'EAUTH') {
-      console.error('⚠️ Error de autenticación - Verifica EMAIL_USER y EMAIL_PASS');
-    }
-    
-    // Si es timeout
-    if (error.code === 'ETIMEDOUT' || error.code === 'ECONNECTION') {
-      console.error('⚠️ Timeout de conexión - El puerto 587 puede estar bloqueado');
-    }
-
     console.log('📧 Mensaje guardado solo en logs');
     
-    // Devolver éxito aunque falle el email
     return res.status(200).json({
       success: true,
       message: 'Mensaje recibido correctamente',
