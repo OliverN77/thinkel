@@ -162,7 +162,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = () => {
             <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
               {user.avatar ? (
                 <img
-                  src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`}
+                  src={user.avatar.startsWith('http') ? user.avatar : `https://thinkel.onrender.com${user.avatar}`}
                   alt={user.name}
                   className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                   title={isCollapsed ? user.name : ''}
