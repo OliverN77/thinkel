@@ -2,15 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 const errorMiddleware = require('./middlewares/error.middleware');
 const authRoutes = require('./routes/auth.routes');
 const contactRoutes = require('./routes/contact.routes');
 const postRoutes = require('./routes/post.routes');
 const commentRoutes = require('./routes/comment.routes');
-const fs = require('fs');
 
 const app = express();
+
+// Conectar a MongoDB
 connectDB();
 
 // Crear directorio de uploads si no existe
@@ -19,7 +21,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// CORS configurado para producción
+// Configuración de CORS
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -31,11 +33,10 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (avatars)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Ruta raíz para verificar que el servidor está corriendo
 app.get('/', (req, res) => {
   res.json({ 
     success: true,
@@ -47,16 +48,26 @@ app.get('/', (req, res) => {
       auth: {
         register: 'POST /api/auth/register',
         login: 'POST /api/auth/login',
-        profile: 'GET /api/auth/profile'
+        profile: 'GET /api/auth/profile',
+        updateProfile: 'PUT /api/auth/profile'
       },
       posts: {
         getAll: 'GET /api/posts',
-        getOne: 'GET /api/posts/:id',
+        getBySlug: 'GET /api/posts/slug/:slug',
+        getById: 'GET /api/posts/:id',
         create: 'POST /api/posts',
         update: 'PUT /api/posts/:id',
-        delete: 'DELETE /api/posts/:id'
+        delete: 'DELETE /api/posts/:id',
+        toggleLike: 'POST /api/posts/:id/like',
+        toggleBookmark: 'POST /api/posts/:id/bookmark'
       },
-      comments: 'GET/POST /api/comments',
+      comments: {
+        getByPost: 'GET /api/comments/post/:postId',
+        create: 'POST /api/comments',
+        update: 'PUT /api/comments/:id',
+        delete: 'DELETE /api/comments/:id',
+        toggleLike: 'POST /api/comments/:id/like'
+      },
       contact: 'POST /api/contact'
     }
   });
@@ -65,33 +76,41 @@ app.get('/', (req, res) => {
 // Health check
 app.get('/health', (req, res) => {
   res.json({ 
+    success: true,
     status: 'OK',
     uptime: process.uptime(),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 
-// Ruta 404 para rutas no encontradas
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Ruta ${req.originalUrl} no encontrada`,
-    availableEndpoints: '/api/auth, /api/posts, /api/comments, /api/contact'
+    availableEndpoints: {
+      auth: '/api/auth',
+      posts: '/api/posts',
+      comments: '/api/comments',
+      contact: '/api/contact'
+    }
   });
 });
 
-// Middleware de error al final
 app.use(errorMiddleware);
 
+// Iniciar servidor
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
+  console.log('═══════════════════════════════════════════════════════');
   console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
   console.log(`📍 Entorno: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 URL: ${process.env.NODE_ENV === 'production' ? 'https://thinkel.onrender.com' : `http://localhost:${PORT}`}`);
+  console.log(`✅ MongoDB: ${process.env.MONGODB_URI ? 'Configurado' : '⚠️  No configurado'}`);
+  console.log('═══════════════════════════════════════════════════════');
 });
