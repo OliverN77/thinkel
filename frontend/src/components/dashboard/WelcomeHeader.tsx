@@ -13,7 +13,7 @@ export function WelcomeHeader({ user, isDark }: Props) {
     if (!user.avatar) {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`
     }
-    return user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`
+    return user.avatar.startsWith('http') ? user.avatar : `https://thinkel.onrender.com${user.avatar}`
   }
 
   return (
