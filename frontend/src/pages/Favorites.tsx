@@ -48,7 +48,7 @@ export default function Favorites() {
             avatar: post.author.avatar 
               ? (post.author.avatar.startsWith('http') 
                   ? post.author.avatar 
-                  : `http://localhost:5000${post.author.avatar}`)
+                  : `https://thinkel.onrender.com${post.author.avatar}`)
               : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=random`,
           },
           thumbnail: post.thumbnail,
