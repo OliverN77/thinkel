@@ -9,6 +9,6 @@ export interface ContactFormData {
 }
 
 export const sendContactMessage = async (data: ContactFormData) => {
-  const response = await axios.post(`${API_URL}/contact`, data);
+  const response = await axios.post(`${API_URL}/api/contact`, data);
   return response.data;
 };
