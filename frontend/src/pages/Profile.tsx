@@ -54,7 +54,7 @@ export default function Profile() {
             username: author.username,
             avatar: author.avatar?.startsWith('http') 
               ? author.avatar 
-              : `http://localhost:5000${author.avatar}`,
+              : `https://thinkel.onrender.com${author.avatar}`,
             bio: author.bio || 'Sin biografía disponible',
           })
 
@@ -79,7 +79,7 @@ export default function Profile() {
               username: author.username,
               avatar: author.avatar?.startsWith('http') 
                 ? author.avatar 
-                : `http://localhost:5000${author.avatar}`,
+                : `https://thinkel.onrender.com${author.avatar}`,
             },
             thumbnail: post.thumbnail,
             slug: post.slug,
