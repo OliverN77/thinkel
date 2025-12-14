@@ -54,7 +54,7 @@ export const BlogPostPage: React.FC = () => {
           }
           return postData.author.avatar.startsWith('http') 
             ? postData.author.avatar 
-            : `http://localhost:5000${postData.author.avatar}`;
+            : `https://thinkel.onrender.com${postData.author.avatar}`;
         };
 
         const transformedPost = {
@@ -125,7 +125,7 @@ export const BlogPostPage: React.FC = () => {
       }
       return comment.author.avatar.startsWith('http') 
         ? comment.author.avatar 
-        : `http://localhost:5000${comment.author.avatar}`;
+        : `https://thinkel.onrender.com${comment.author.avatar}`;
     };
 
     return {
