@@ -15,10 +15,18 @@ export function useAuth() {
     
     try {
       const res = await getProfile();
-      setUser(res.data);
+      if (res.success && res.user) {
+        setUser(res.user);
+      } else {
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+      }
     } catch (err) {
       console.error('Error al cargar perfil:', err);
       setUser(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
     } finally {
       setLoading(false);
     }
