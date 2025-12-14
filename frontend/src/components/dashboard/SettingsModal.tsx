@@ -23,7 +23,7 @@ export function SettingsModal({ open, onClose, user }: Props) {
     user.avatar 
       ? (user.avatar.startsWith('http') 
           ? user.avatar 
-          : `http://localhost:5000${user.avatar}`)
+          : `https://thinkel.onrender.com${user.avatar}`)
       : `https://ui-avatars.com/api/?name=${user.name}&background=random`,
   )
   const [isDark, setIsDark] = useState(true)
