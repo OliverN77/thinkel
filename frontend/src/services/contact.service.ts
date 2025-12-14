@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://thinkel.onrender.com';
 
 export interface ContactFormData {
   name: string;
