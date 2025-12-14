@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   username?: string;
-  avatar?: string | null;
+  avatar?: string;
   bio?: string;
   role?: 'user' | 'admin';
   createdAt?: string;
@@ -16,7 +16,6 @@ export interface Project {
   updatedAt: string;
 }
 
-// ✅ Agregar interfaces de respuestas
 export interface AuthResponse {
   success: boolean;
   message: string;
