@@ -10,19 +10,30 @@ const protect = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({ success: false, message: 'No autorizado, token no encontrado' });
+      return res.status(401).json({ 
+        success: false, 
+        message: 'No autorizado, token no encontrado' 
+      });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
+    
+    req.user = await User.findById(decoded._id).select('-password');
     
     if (!req.user) {
-      return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Usuario no encontrado' 
+      });
     }
     
     next();
   } catch (error) {
-    res.status(401).json({ success: false, message: 'Token inválido o expirado' });
+    console.error('❌ Error en middleware auth:', error.message);
+    res.status(401).json({ 
+      success: false, 
+      message: 'Token inválido o expirado' 
+    });
   }
 };
 
