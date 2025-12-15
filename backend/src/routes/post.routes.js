@@ -3,8 +3,13 @@ const router = express.Router();
 const postController = require('../controllers/post.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
+router.get('/my/all', authMiddleware, postController.getMyPosts);
+router.get('/my/bookmarked', authMiddleware, postController.getBookmarkedPosts);
+router.get('/my/stats', authMiddleware, postController.getUserStats);
+
 router.get('/', postController.getAllPosts);
 router.get('/slug/:slug', postController.getPostBySlug);
+
 router.get('/:id', postController.getPostById);
 router.post('/', authMiddleware, postController.createPost);
 router.put('/:id', authMiddleware, postController.updatePost);
