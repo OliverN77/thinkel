@@ -21,32 +21,51 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Configuración de CORS
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://thinkel.onrender.com',
-    'https://thinkelpage-3y4d.vercel.app',
-    'https://thinkelpage-*.vercel.app',
-    'https://*.vercel.app',
-    process.env.FRONTEND_URL || '*'
-  ],
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://thinkel.onrender.com',
+      'https://thinkelpage-3y4d.vercel.app',
+      process.env.FRONTEND_URL
+    ];
+    
+    const isVercelApp = origin.endsWith('.vercel.app');
+    
+    if (allowedOrigins.includes(origin) || isVercelApp) {
+      callback(null, true);
+    } else {
+      console.log('⚠️ Origen no permitido:', origin);
+      callback(null, true);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 
-}));
+  maxAge: 600
+};
+
+app.use(cors(corsOptions));
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && origin.endsWith('.vercel.app')) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+});
 
 // Middleware para parsear JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (avatars)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Ruta raíz - Información de la API
 app.get('/', (req, res) => {
   res.json({ 
     success: true,
